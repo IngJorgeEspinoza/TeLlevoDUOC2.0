@@ -3,7 +3,12 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  apiKey: 'AIzaSyCIG3Ih_fEmYNxJHxuGverE9XSdxklzw9U',
+  firebaseConfig: {
+    // Lo configuraremos más adelante cuando tengamos Firebase
+  },
+  apiUrl: 'https://uber-nodejs-server-git-d61f89-guillermovillacuratorres-projects.vercel.app/api/'
 };
 
 /*
