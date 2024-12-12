@@ -1,13 +1,139 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>viajes</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="duoc-blue">
+    <ion-title color="duoc-yellow">Mis Viajes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="nuevoViaje()">
+        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button routerLink="/help" color="duoc-yellow">
+        <ion-icon slot="icon-only" name="help-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">viajes</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="actualizarViajes($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Lista de viajes -->
+  <ion-list *ngIf="viajes.length > 0">
+    <ion-item-sliding *ngFor="let viaje of viajes">
+      <ion-item detail="false" (click)="verDetalleViaje(viaje)">
+        <ion-avatar slot="start">
+          <img [src]="obtenerImagenVehiculo(viaje.id_vehiculo)" alt="Vehículo">
+        </ion-avatar>
+        
+        <ion-label>
+          <h2>{{viaje.ubicacion_destino}}</h2>
+          <p>
+            <ion-icon name="cash-outline"></ion-icon>
+            ${{viaje.costo | number:'1.0-0'}}
+          </p>
+          <p>
+            <ion-icon name="time-outline"></ion-icon>
+            {{formatearFecha(viaje.fecha_creacion)}}
+          </p>
+        </ion-label>
+
+        <ion-badge slot="end" [color]="obtenerColorEstado(viaje.estado)">
+          {{obtenerEstado(viaje.estado)}}
+        </ion-badge>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option color="danger" (click)="cancelarViaje(viaje)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <!-- Mensaje cuando no hay viajes -->
+  <div class="empty-state" *ngIf="viajes.length === 0 && !cargando">
+    <ion-icon name="car-outline"></ion-icon>
+    <h3>No hay viajes {{segmentoSeleccionado === 'activos' ? 'activos' : 'en el historial'}}</h3>
+    <p *ngIf="segmentoSeleccionado === 'activos'">
+      Comienza publicando un nuevo viaje
+    </p>
+    <ion-button (click)="nuevoViaje()" *ngIf="segmentoSeleccionado === 'activos'">
+      Publicar Viaje
+    </ion-button>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div class="loading-spinner" *ngIf="cargando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando viajes...</p>
+  </div>
 </ion-content>
+
+<!-- Modal para nuevo viaje -->
+<ion-modal [isOpen]="modalAbierto" (willDismiss)="cerrarModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Nuevo Viaje</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModal()">Cerrar</ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form [formGroup]="viajeForm" (ngSubmit)="guardarViaje()">
+        <!-- Selector de vehículo -->
+        <ion-item>
+          <ion-label position="stacked">Vehículo</ion-label>
+          <ion-select formControlName="id_vehiculo" placeholder="Selecciona un vehículo">
+            <ion-select-option *ngFor="let vehiculo of vehiculos" [value]="vehiculo.id">
+              {{vehiculo.marca}} {{vehiculo.modelo}} - {{vehiculo.patente}}
+            </ion-select-option>
+          </ion-select>
+          <ion-note slot="error" *ngIf="viajeForm.get('id_vehiculo')?.touched && viajeForm.get('id_vehiculo')?.errors?.['required']">
+            Debes seleccionar un vehículo
+          </ion-note>
+        </ion-item>
+
+        <!-- Destino -->
+        <ion-item>
+          <ion-label position="stacked">Destino</ion-label>
+          <ion-input 
+            formControlName="ubicacion_destino"
+            placeholder="Ej: Av. Vicuña Mackenna 4917">
+          </ion-input>
+          <ion-note slot="error" *ngIf="viajeForm.get('ubicacion_destino')?.touched && viajeForm.get('ubicacion_destino')?.errors?.['required']">
+            El destino es requerido
+          </ion-note>
+        </ion-item>
+
+        <!-- Costo -->
+        <ion-item>
+          <ion-label position="stacked">Costo por pasajero</ion-label>
+          <ion-input 
+            type="number" 
+            formControlName="costo"
+            placeholder="Ej: 1500">
+          </ion-input>
+          <ion-note slot="error" *ngIf="viajeForm.get('costo')?.touched && viajeForm.get('costo')?.errors?.['required']">
+            El costo es requerido
+          </ion-note>
+          <ion-note slot="error" *ngIf="viajeForm.get('costo')?.touched && viajeForm.get('costo')?.errors?.['min']">
+            El costo mínimo es $500
+          </ion-note>
+        </ion-item>
+
+        <ion-button 
+          expand="block" 
+          type="submit" 
+          [disabled]="!viajeForm.valid || guardando"
+          class="ion-margin-top">
+          <ion-spinner name="crescent" *ngIf="guardando"></ion-spinner>
+          <span *ngIf="!guardando">Publicar Viaje</span>
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>

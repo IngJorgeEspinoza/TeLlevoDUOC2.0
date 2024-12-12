@@ -1,13 +1,113 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>mapa</ion-title>
+<ion-header class="ion-no-border">
+  <ion-toolbar color="duoc-blue">
+    <ion-title color="duoc-yellow">Viajes Disponibles</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="actualizarViajes()">
+        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button routerLink="/help" color="duoc-yellow">
+        <ion-icon slot="icon-only" name="help-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">mapa</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content>
+  <!-- Mapa principal -->
+  <div class="map-container">
+    <google-map 
+      [center]="center" 
+      [zoom]="zoom"
+      [options]="mapOptions"
+      height="100%"
+      width="100%">
+      <!-- Marcador de DUOC -->
+      <map-marker
+        [position]="duocPosition"
+        [title]="'DUOC UC San Joaquín'"
+        [options]="duocMarkerOptions">
+      </map-marker>
+
+      <!-- Marcadores de destinos -->
+      <map-marker
+        *ngFor="let viaje of viajes"
+        [position]="getPosition(viaje.ubicacion_destino)"
+        [title]="'Destino'"
+        (mapClick)="mostrarDetallesViaje(viaje)">
+      </map-marker>
+
+      <!-- Ruta seleccionada -->
+      <map-polyline
+        *ngIf="rutaSeleccionada"
+        [path]="rutaSeleccionada"
+        [options]="polylineOptions">
+      </map-polyline>
+    </google-map>
+  </div>
+
+  <!-- Card con detalles del viaje seleccionado -->
+  <ion-card *ngIf="viajeSeleccionado" class="viaje-details">
+    <ion-card-header>
+      <ion-card-subtitle>
+        <ion-icon name="location-outline"></ion-icon>
+        {{viajeSeleccionado.ubicacion_destino}}
+      </ion-card-subtitle>
+      <ion-card-title>
+        <ion-text color="duoc-blue">
+          ${{viajeSeleccionado.costo | number:'1.0-0'}}
+        </ion-text>
+      </ion-card-title>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="6">
+            <ion-text color="medium">
+              <small>Conductor:</small>
+            </ion-text>
+            <p>{{conductorInfo?.nombre || 'Cargando...'}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <ion-text color="medium">
+              <small>Vehículo:</small>
+            </ion-text>
+            <p>{{vehiculoInfo?.marca}} {{vehiculoInfo?.modelo}}</p>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size="6">
+            <ion-text color="medium">
+              <small>Tiempo estimado:</small>
+            </ion-text>
+            <p>{{tiempoEstimado || 'Calculando...'}}</p>
+          </ion-col>
+          <ion-col size="6">
+            <ion-text color="medium">
+              <small>Distancia:</small>
+            </ion-text>
+            <p>{{distanciaEstimada || 'Calculando...'}}</p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+
+      <div class="action-buttons">
+        <ion-button expand="block" color="duoc-blue" (click)="tomarViaje()" [disabled]="cargandoViaje">
+          <ion-icon name="car-outline" slot="start"></ion-icon>
+          Tomar Viaje
+        </ion-button>
+        <ion-button expand="block" fill="outline" color="duoc-blue" (click)="chatearConductor()">
+          <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+          Chatear
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Loading spinner -->
+  <ion-spinner 
+    *ngIf="cargando" 
+    name="crescent" 
+    class="loading-spinner">
+  </ion-spinner>
 </ion-content>

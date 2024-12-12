@@ -1,0 +1,134 @@
+.content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  
+  .header-item {
+    margin-bottom: 16px;
+    
+    ion-label {
+      h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      p {
+        font-size: 1rem;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+  
+  .faq-item {
+    margin-bottom: 12px;
+    background: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    
+    .question-item {
+      --padding-start: 16px;
+      --padding-end: 16px;
+      --background: var(--ion-color-light);
+      
+      &:hover {
+        --background: var(--ion-color-light-shade);
+      }
+      
+      ion-label {
+        font-weight: 500;
+        white-space: normal;
+      }
+    }
+    
+    .faq-answer {
+      padding: 16px;
+      background: #ffffff;
+      border-top: 1px solid var(--ion-color-light);
+      
+      p {
+        margin: 0;
+        color: var(--ion-color-dark);
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+    }
+  }
+  
+  .additional-help {
+    margin-top: 32px;
+    text-align: center;
+    padding: 24px;
+    background: var(--ion-color-light);
+    border-radius: 8px;
+    
+    h3 {
+      color: var(--ion-color-duoc-blue);
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+    
+    p {
+      color: var(--ion-color-medium);
+      margin-bottom: 16px;
+    }
+    
+    ion-button {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+  }
+  
+  ion-footer {
+    ion-card {
+      margin: 0;
+      border-radius: 0;
+      
+      ion-card-content {
+        p {
+          margin: 8px 0;
+          
+          strong {
+            color: var(--ion-color-duoc-blue);
+          }
+          
+          a {
+            color: var(--ion-color-primary);
+            text-decoration: none;
+            
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  // Animaciones
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .faq-answer {
+    animation: slideDown 0.3s ease-out;
+  }
+  
+  // Responsive
+  @media (max-width: 576px) {
+    .content-wrapper {
+      padding: 8px;
+    }
+    
+    .header-item ion-label h2 {
+      font-size: 1.3rem;
+    }
+  }

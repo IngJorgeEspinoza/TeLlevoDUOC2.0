@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { CanActivate, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { Observable, map, take } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,22 +13,17 @@ export class AuthGuard implements CanActivate {
     private router: Router
   ) {}
 
-  // Esta función se ejecuta cada vez que alguien intenta acceder a una ruta protegida
-  async canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Promise<boolean> {
-    
-    // Verificamos si hay un usuario autenticado
-    const isAuthenticated = await this.authService.isAuthenticated();
-    
-    if (isAuthenticated) {
-      // Si está autenticado, permitimos el acceso
-      return true;
-    } else {
-      // Si no está autenticado, lo enviamos al login
-      this.router.navigate(['/login']);
-      return false;
-    }
+  canActivate(): Observable<boolean> {
+    return this.authService.authState$.pipe(
+      take(1),
+      map(user => {
+        if (user) {
+          return true;
+        } else {
+          this.router.navigate(['/login']);
+          return false;
+        }
+      })
+    );
   }
 }

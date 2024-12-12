@@ -1,0 +1,59 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="duoc-blue">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/login" color="duoc-yellow"></ion-back-button>
+    </ion-buttons>
+    <ion-title color="duoc-yellow">Ayuda</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div class="content-wrapper">
+    
+    <!-- Sección de Preguntas Frecuentes -->
+    <ion-list>
+      <ion-item lines="none" class="header-item">
+        <ion-label color="duoc-blue">
+          <h2>Preguntas Frecuentes</h2>
+          <p>Encuentra respuestas a las preguntas más comunes.</p>
+        </ion-label>
+      </ion-item>
+  
+      <div *ngFor="let faq of faqs" class="faq-item">
+        <ion-item button (click)="toggleAnswer(faq)" lines="none" class="question-item">
+          <ion-label>
+            {{ faq.question }}
+          </ion-label>
+          <ion-icon [name]="faq.isOpen ? 'chevron-up-outline' : 'chevron-down-outline'" slot="end" color="duoc-blue"></ion-icon>
+        </ion-item>
+        <div *ngIf="faq.isOpen" class="faq-answer">
+          <p>{{ faq.answer }}</p>
+        </div>
+      </div>
+    </ion-list>
+  
+    <!-- Sección de Ayuda Adicional -->
+    <div class="additional-help">
+      <h3>¿Necesitas más ayuda?</h3>
+      <p>Contáctanos por WhatsApp</p>
+      <ion-button color="success" expand="block" (click)="openWhatsApp()">
+        <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+        Contactar por WhatsApp
+      </ion-button>
+    </div>
+  
+  </div>
+</ion-content>
+
+<ion-footer class="ion-no-border">
+  <ion-toolbar color="duoc-blue">
+    <ion-title color="duoc-yellow">Información de Contacto</ion-title>
+  </ion-toolbar>
+  <ion-card>
+    <ion-card-content>
+      <p><strong>Dirección:</strong> DUOC UC San Joaquín</p>
+      <p><strong>Teléfono:</strong> +56 9 9137 9473</p>
+      <p><strong>Email:</strong> <a [href]="'mailto:' + contactEmail">{{ contactEmail }}</a></p>
+    </ion-card-content>
+  </ion-card>
+</ion-footer>

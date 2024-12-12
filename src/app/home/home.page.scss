@@ -1,27 +1,110 @@
-#container {
+.menu-header {
+  padding: 20px;
   text-align: center;
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  background: var(--ion-color-duoc-blue);
+  
+  .user-image {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid var(--ion-color-duoc-yellow);
+    
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+  
+  h2 {
+    margin: 0;
+    color: var(--ion-color-duoc-yellow);
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  
+  p {
+    margin: 5px 0 0;
+    color: var(--ion-color-light);
+    font-size: 0.9rem;
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+ion-menu {
+  --width: 280px;
+  
+  ion-list {
+    padding-top: 0;
+    
+    ion-item {
+      --padding-start: 16px;
+      
+      ion-icon {
+        color: var(--ion-color-duoc-blue);
+        margin-right: 8px;
+      }
+    }
+  }
 }
 
-#container p {
+// Tamaños de fuente
+:host-context(.font-small) {
+  font-size: 14px;
+  
+  ion-title {
+    font-size: 16px;
+  }
+  
+  ion-label {
+    font-size: 14px;
+  }
+}
+
+:host-context(.font-medium) {
   font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
+  
+  ion-title {
+    font-size: 18px;
+  }
+  
+  ion-label {
+    font-size: 16px;
+  }
 }
 
-#container a {
-  text-decoration: none;
+:host-context(.font-large) {
+  font-size: 18px;
+  
+  ion-title {
+    font-size: 20px;
+  }
+  
+  ion-label {
+    font-size: 18px;
+  }
+}
+
+// Temas
+:host-context(.dark-theme) {
+  --ion-background-color: #121212;
+  --ion-background-color-rgb: 18,18,18;
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255,255,255;
+  --ion-border-color: #222222;
+  
+  ion-menu {
+    --ion-background-color: #1e1e1e;
+  }
+}
+
+// Animaciones
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.menu-header {
+  animation: fadeIn 0.3s ease-in-out;
 }

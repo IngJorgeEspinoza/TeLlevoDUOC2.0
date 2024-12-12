@@ -1,32 +1,65 @@
 import { Injectable } from '@angular/core';
+import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, authState, sendPasswordResetEmail, User } from '@angular/fire/auth';
 import { Router } from '@angular/router';
+import { Observable, from } from 'rxjs';
+import { StorageService } from './storage.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private isLoggedIn: boolean = false;
+  public authState$ = authState(this.auth);
 
-  constructor(private router: Router) { }
+  constructor(
+    private auth: Auth,
+    private router: Router,
+    private storage: StorageService
+  ) {}
 
-  // Este método verificará si el usuario está autenticado
-  async isAuthenticated(): Promise<boolean> {
-    // Por ahora, simplemente devolvemos el valor de isLoggedIn
-    // Más adelante, esto verificará con Firebase
-    return this.isLoggedIn;
+  async login(email: string, password: string): Promise<void> {
+    try {
+      const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
+      await this.storage.set('user', userCredential.user);
+      this.router.navigate(['/home']);
+    } catch (error) {
+      throw error;
+    }
   }
 
-  // Este método se llamará cuando el usuario inicie sesión exitosamente
-  async login(email: string, password: string): Promise<boolean> {
-    // Por ahora es un método simple
-    // Más adelante implementaremos la autenticación real con Firebase
-    this.isLoggedIn = true;
-    return true;
+  async registro(email: string, password: string): Promise<any> {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      return userCredential.user;
+    } catch (error) {
+      throw error;
+    }
   }
 
-  // Este método se llamará cuando el usuario cierre sesión
+  async recuperarPassword(email: string): Promise<void> {
+    try {
+      await sendPasswordResetEmail(this.auth, email);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async logout(): Promise<void> {
-    this.isLoggedIn = false;
-    await this.router.navigate(['/login']);
+    try {
+      await signOut(this.auth);
+      await this.storage.remove('user');
+      this.router.navigate(['/login']);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  getCurrentUser(): User | null {
+    return this.auth.currentUser;
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    const user = await this.storage.get('user');
+    return user !== null;
   }
 }

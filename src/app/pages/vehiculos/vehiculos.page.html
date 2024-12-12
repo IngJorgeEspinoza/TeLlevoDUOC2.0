@@ -1,0 +1,195 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="duoc-blue">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/perfil" color="duoc-yellow"></ion-back-button>
+    </ion-buttons>
+    <ion-title color="duoc-yellow">Mis Vehículos</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="nuevoVehiculo()">
+        <ion-icon name="add-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button routerLink="/help" color="duoc-yellow">
+        <ion-icon slot="icon-only" name="help-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Lista de vehículos -->
+  <ion-list *ngIf="vehiculos.length > 0">
+    <ion-item-sliding *ngFor="let vehiculo of vehiculos">
+      <ion-item detail (click)="verDetalles(vehiculo)">
+        <ion-thumbnail slot="start">
+          <img [src]="vehiculo.imagen || 'assets/imgs/default-car.png'" [alt]="vehiculo.marca">
+        </ion-thumbnail>
+        <ion-label>
+          <h2>{{vehiculo.marca}} {{vehiculo.modelo}}</h2>
+          <h3>{{vehiculo.patente}}</h3>
+          <p>{{vehiculo.anio}} - {{vehiculo.color}}</p>
+        </ion-label>
+      </ion-item>
+
+      <ion-item-options side="end">
+        <ion-item-option color="primary" (click)="editarVehiculo(vehiculo)">
+          <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+        </ion-item-option>
+        <ion-item-option color="danger" (click)="eliminarVehiculo(vehiculo)">
+          <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+        </ion-item-option>
+      </ion-item-options>
+    </ion-item-sliding>
+  </ion-list>
+
+  <!-- Estado vacío -->
+  <div class="empty-state" *ngIf="vehiculos.length === 0 && !cargando">
+    <ion-icon name="car-outline"></ion-icon>
+    <h3>No tienes vehículos registrados</h3>
+    <p>Agrega un vehículo para comenzar a ofrecer viajes</p>
+    <ion-button (click)="nuevoVehiculo()" color="duoc-blue">
+      Agregar Vehículo
+    </ion-button>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div class="loading-container" *ngIf="cargando">
+    <ion-spinner name="crescent" color="duoc-blue"></ion-spinner>
+    <p>Cargando vehículos...</p>
+  </div>
+</ion-content>
+
+<!-- Modal para nuevo/editar vehículo -->
+<ion-modal [isOpen]="modalAbierto" (willDismiss)="cerrarModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar color="duoc-blue">
+        <ion-title color="duoc-yellow">{{modoEdicion ? 'Editar' : 'Nuevo'}} Vehículo</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="cerrarModal()" color="duoc-yellow">
+            <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="ion-padding">
+      <form [formGroup]="vehiculoForm" (ngSubmit)="guardarVehiculo()">
+        <!-- Imagen del vehículo -->
+        <div class="imagen-container">
+          <div class="imagen-preview" (click)="seleccionarImagen()">
+            <img [src]="imagenPreview || vehiculoSeleccionado?.imagen || 'assets/imgs/default-car.png'" alt="Vehículo">
+            <div class="overlay">
+              <ion-icon name="camera-outline"></ion-icon>
+              <p>Cambiar imagen</p>
+            </div>
+          </div>
+          <input
+            #fileInput
+            type="file"
+            accept="image/*"
+            (change)="onImagenSeleccionada($event)"
+            hidden>
+        </div>
+
+        <!-- Campos del formulario -->
+        <ion-list>
+          <ion-item>
+            <ion-label position="floating">Patente <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input 
+              formControlName="patente" 
+              placeholder="Ej: ABCD12"
+              maxlength="6"
+              [clearInput]="true">
+            </ion-input>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('patente')?.touched && vehiculoForm.get('patente')?.errors?.['required']">
+              La patente es requerida
+            </ion-note>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('patente')?.touched && vehiculoForm.get('patente')?.errors?.['pattern']">
+              Formato: ABCD12
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Marca <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input 
+              formControlName="marca" 
+              placeholder="Ej: Toyota"
+              [clearInput]="true">
+            </ion-input>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('marca')?.touched && vehiculoForm.get('marca')?.errors?.['required']">
+              La marca es requerida
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Modelo <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input 
+              formControlName="modelo" 
+              placeholder="Ej: Corolla"
+              [clearInput]="true">
+            </ion-input>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('modelo')?.touched && vehiculoForm.get('modelo')?.errors?.['required']">
+              El modelo es requerido
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Año <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input 
+              type="number" 
+              formControlName="anio"
+              placeholder="Ej: 2020"
+              [min]="2000"
+              [max]="new Date().getFullYear()"
+              [clearInput]="true">
+            </ion-input>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('anio')?.touched && vehiculoForm.get('anio')?.errors?.['required']">
+              El año es requerido
+            </ion-note>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('anio')?.touched && (vehiculoForm.get('anio')?.errors?.['min'] || vehiculoForm.get('anio')?.errors?.['max'])">
+              El año debe estar entre 2000 y {{new Date().getFullYear()}}
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Color <ion-text color="danger">*</ion-text></ion-label>
+            <ion-input 
+              formControlName="color" 
+              placeholder="Ej: Rojo"
+              [clearInput]="true">
+            </ion-input>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('color')?.touched && vehiculoForm.get('color')?.errors?.['required']">
+              El color es requerido
+            </ion-note>
+          </ion-item>
+
+          <ion-item>
+            <ion-label position="floating">Tipo de Combustible <ion-text color="danger">*</ion-text></ion-label>
+            <ion-select formControlName="tipo_combustible" placeholder="Selecciona el tipo">
+              <ion-select-option value="Gasolina">Gasolina</ion-select-option>
+              <ion-select-option value="Diesel">Diesel</ion-select-option>
+              <ion-select-option value="Gas">Gas</ion-select-option>
+              <ion-select-option value="Eléctrico">Eléctrico</ion-select-option>
+            </ion-select>
+            <ion-note slot="error" *ngIf="vehiculoForm.get('tipo_combustible')?.touched && vehiculoForm.get('tipo_combustible')?.errors?.['required']">
+              El tipo de combustible es requerido
+            </ion-note>
+          </ion-item>
+        </ion-list>
+
+        <div class="ion-padding">
+          <ion-button 
+            expand="block" 
+            type="submit"
+            color="duoc-blue"
+            [disabled]="!vehiculoForm.valid || guardando">
+            <ion-spinner name="crescent" *ngIf="guardando"></ion-spinner>
+            <span *ngIf="!guardando">
+              {{modoEdicion ? 'Actualizar' : 'Guardar'}} Vehículo
+            </span>
+          </ion-button>
+        </div>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>

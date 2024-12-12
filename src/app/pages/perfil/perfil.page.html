@@ -1,13 +1,137 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>perfil</ion-title>
+<ion-header class="ion-no-border"></ion-header>
+  <ion-toolbar color="duoc-blue">
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/home" color="duoc-yellow"></ion-back-button>
+    </ion-buttons>
+    <ion-title color="duoc-yellow">Mi Perfil</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleEdicion()" [disabled]="guardando">
+        <ion-icon [name]="modoEdicion ? 'close-outline' : 'create-outline'" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">perfil</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding">
+  <div class="perfil-container">
+    <!-- Foto de perfil -->
+    <div class="imagen-perfil">
+      <div class="imagen-container" (click)="modoEdicion && seleccionarImagen()">
+        <img [src]="imagenPreview || usuario?.imagen || 'assets/imgs/default-user.png'" alt="Foto de perfil">
+        <div class="overlay" *ngIf="modoEdicion">
+          <ion-icon name="camera"></ion-icon>
+        </div>
+      </div>
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        (change)="onImagenSeleccionada($event)"
+        hidden>
+    </div>
+
+    <!-- Formulario de perfil -->
+    <form [formGroup]="perfilForm" (ngSubmit)="guardarCambios()">
+      <!-- Nombre -->
+      <ion-item>
+        <ion-label position="floating">Nombre completo</ion-label>
+        <ion-input
+          type="text"
+          formControlName="nombre"
+          [readonly]="!modoEdicion">
+        </ion-input>
+        <ion-note slot="error" *ngIf="perfilForm.get('nombre')?.touched && perfilForm.get('nombre')?.errors?.['required']">
+          El nombre es requerido
+        </ion-note>
+      </ion-item>
+
+      <!-- Correo (no editable) -->
+      <ion-item>
+        <ion-label position="floating">Correo electrónico</ion-label>
+        <ion-input
+          type="email"
+          formControlName="correo"
+          readonly>
+        </ion-input>
+      </ion-item>
+
+      <!-- Teléfono -->
+      <ion-item>
+        <ion-label position="floating">Teléfono</ion-label>
+        <ion-input
+          type="tel"
+          formControlName="telefono"
+          [readonly]="!modoEdicion">
+        </ion-input>
+        <ion-note slot="error" *ngIf="perfilForm.get('telefono')?.touched && perfilForm.get('telefono')?.errors?.['required']">
+          El teléfono es requerido
+        </ion-note>
+        <ion-note slot="error" *ngIf="perfilForm.get('telefono')?.touched && perfilForm.get('telefono')?.errors?.['pattern']">
+          Formato: +569XXXXXXXX
+        </ion-note>
+      </ion-item>
+
+      <!-- Botón de guardar -->
+      <ion-button
+        expand="block"
+        type="submit"
+        class="guardar-button"
+        *ngIf="modoEdicion"
+        [disabled]="!perfilForm.valid || guardando">
+        <ion-spinner name="crescent" *ngIf="guardando"></ion-spinner>
+        <span *ngIf="!guardando">Guardar Cambios</span>
+      </ion-button>
+    </form>
+
+    <!-- Estadísticas -->
+    <div class="estadisticas">
+      <ion-card>
+        <ion-card-content>
+          <ion-grid>
+            <ion-row>
+              <ion-col size="6">
+                <div class="stat-item">
+                  <ion-icon name="car-outline"></ion-icon>
+                  <h3>{{estadisticas.totalViajes || 0}}</h3>
+                  <p>Viajes Totales</p>
+                </div>
+              </ion-col>
+              <ion-col size="6">
+                <div class="stat-item">
+                  <ion-icon name="star-outline"></ion-icon>
+                  <h3>{{estadisticas.calificacion || 0}}/5</h3>
+                  <p>Calificación</p>
+                </div>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Vehículos registrados -->
+    <div class="vehiculos-section">
+      <ion-item-divider>
+        <ion-label>
+          Mis Vehículos
+          <ion-button fill="clear" size="small" (click)="irAVehiculos()">
+            Ver todos
+            <ion-icon name="chevron-forward-outline" slot="end"></ion-icon>
+          </ion-button>
+        </ion-label>
+      </ion-item-divider>
+
+      <ion-list>
+        <ion-item *ngFor="let vehiculo of vehiculos" detail>
+          <ion-thumbnail slot="start">
+            <img [src]="vehiculo.imagen || 'assets/imgs/default-car.png'" [alt]="vehiculo.marca">
+          </ion-thumbnail>
+          <ion-label>
+            <h2>{{vehiculo.marca}} {{vehiculo.modelo}}</h2>
+            <p>{{vehiculo.patente}}</p>
+          </ion-label>
+        </ion-item>
+      </ion-list>
+    </div>
+  </div>
 </ion-content>
