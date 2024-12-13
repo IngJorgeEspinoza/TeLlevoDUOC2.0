@@ -5,6 +5,7 @@ import { UsuarioService } from '../../services/usuario.service';
 import { VehiculoService } from '../../services/vehiculo.service';
 import { LoadingController, ToastController, AlertController } from '@ionic/angular';
 import { environment } from '../../../environments/environment';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-mapa',
@@ -82,18 +83,17 @@ export class MapaPage implements OnInit {
   async cargarViajes() {
     this.cargando = true;
     try {
-      const viajes = await this.viajeService.obtenerViaje().toPromise();
-      this.viajes = viajes.filter((v: any) => v.estado === 1); // Solo viajes activos
+      const viajes = await firstValueFrom(this.viajeService.obtenerViaje());
+      this.viajes = viajes.filter((v: any) => v.estado === 1);
     } catch (error) {
-      this.mostrarToast('Error al cargar los viajes', 'danger');
+      await this.mostrarToast('Error al cargar los viajes', 'danger');
     } finally {
       this.cargando = false;
     }
   }
 
   getPosition(ubicacion: string): google.maps.LatLngLiteral {
-    // Aquí deberías implementar la geocodificación
-    // Por ahora retornamos una posición aleatoria cerca de DUOC
+    // Aquí deberías implementar la geocodificación usando la API de Google Maps
     return {
       lat: this.duocPosition.lat + (Math.random() - 0.5) * 0.01,
       lng: this.duocPosition.lng + (Math.random() - 0.5) * 0.01
@@ -106,17 +106,17 @@ export class MapaPage implements OnInit {
 
     try {
       // Cargar información del conductor
-      const conductor = await this.usuarioService.obtenerUsuario(null, viaje.id_usuario).toPromise();
+      const conductor = await firstValueFrom(this.usuarioService.obtenerUsuario(undefined, viaje.id_usuario));
       this.conductorInfo = conductor;
 
       // Cargar información del vehículo
-      const vehiculo = await this.vehiculoService.obtenerVehiculo(viaje.id_vehiculo).toPromise();
+      const vehiculo = await firstValueFrom(this.vehiculoService.obtenerVehiculo(viaje.id_vehiculo));
       this.vehiculoInfo = vehiculo;
 
       // Calcular ruta
       await this.calcularRuta(viaje.ubicacion_destino);
     } catch (error) {
-      this.mostrarToast('Error al cargar los detalles', 'danger');
+      await this.mostrarToast('Error al cargar los detalles', 'danger');
     } finally {
       this.cargando = false;
     }
@@ -128,7 +128,7 @@ export class MapaPage implements OnInit {
     try {
       const result = await directionsService.route({
         origin: this.duocPosition,
-        destination: this.getPosition(destino), // Aquí deberías usar la geocodificación real
+        destination: this.getPosition(destino),
         travelMode: google.maps.TravelMode.DRIVING
       });
 
@@ -138,13 +138,12 @@ export class MapaPage implements OnInit {
           lng: point.lng()
         }));
 
-        // Actualizar tiempo y distancia
         const route = result.routes[0].legs[0];
         this.tiempoEstimado = route.duration?.text || '';
         this.distanciaEstimada = route.distance?.text || '';
       }
     } catch (error) {
-      this.mostrarToast('Error al calcular la ruta', 'danger');
+      await this.mostrarToast('Error al calcular la ruta', 'danger');
     }
   }
 
@@ -164,12 +163,12 @@ export class MapaPage implements OnInit {
           handler: async () => {
             this.cargandoViaje = true;
             try {
-              await this.viajeService.actualizarEstadoViaje(this.viajeSeleccionado.id, 2).toPromise();
-              this.mostrarToast('Viaje tomado exitosamente', 'success');
+              await firstValueFrom(this.viajeService.actualizarEstadoViaje(this.viajeSeleccionado.id, 2));
+              await this.mostrarToast('Viaje tomado exitosamente', 'success');
               this.viajeSeleccionado = null;
-              this.cargarViajes();
+              await this.cargarViajes();
             } catch (error) {
-              this.mostrarToast('Error al tomar el viaje', 'danger');
+              await this.mostrarToast('Error al tomar el viaje', 'danger');
             } finally {
               this.cargandoViaje = false;
             }
@@ -182,13 +181,12 @@ export class MapaPage implements OnInit {
   }
 
   async chatearConductor() {
-    // Implementar lógica de chat
-    this.mostrarToast('Función de chat en desarrollo', 'warning');
+    await this.mostrarToast('Función de chat en desarrollo', 'warning');
   }
 
   async actualizarViajes() {
     await this.cargarViajes();
-    this.mostrarToast('Viajes actualizados', 'success');
+    await this.mostrarToast('Viajes actualizados', 'success');
   }
 
   private async mostrarToast(mensaje: string, color: 'success' | 'danger' | 'warning') {

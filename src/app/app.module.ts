@@ -1,49 +1,37 @@
-import { NgModule, isDevMode } from '@angular/core';
+import { NgModule, isDevMode, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouteReuseStrategy } from '@angular/router';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { HttpClientModule } from '@angular/common/http';
-
-// Componentes
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { GoogleMapsModule } from '@angular/google-maps';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-
-// Módulos personalizados
-import { FirebaseModule } from './modules/firebase.module';
-
-// Storage
 import { IonicStorageModule } from '@ionic/storage-angular';
-
-// Forms
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-
-// Google Maps
-import { GoogleMapsModule } from '@angular/google-maps';
-
-// Service Worker para PWA
-import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { ServiceWorkerModule } from '@angular/service-worker';
+
+// Firebase imports
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
+import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
+  declarations: [AppComponent],
   imports: [
-    BrowserModule, 
-    IonicModule.forRoot({
-      mode: 'md',
-      backButtonText: 'Volver'
-    }), 
+    BrowserModule,
+    IonicModule.forRoot(),
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
     GoogleMapsModule,
-    IonicStorageModule.forRoot({
-      name: 'tellevoduoc_db',
-      driverOrder: ['indexeddb', 'sqlite', 'websql']
-    }),
-    FirebaseModule,
+    IonicStorageModule.forRoot(),
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireAuthModule,
+    AngularFirestoreModule,
+    AngularFireStorageModule,
     ServiceWorkerModule.register('ngsw-worker.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000'
@@ -52,6 +40,7 @@ import { environment } from '../environments/environment';
   providers: [
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy }
   ],
-  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
+  bootstrap: [AppComponent]
 })
 export class AppModule { }

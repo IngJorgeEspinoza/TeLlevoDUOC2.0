@@ -1,239 +1,143 @@
 .registro-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+  
+  .logo-container {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeIn 0.5s ease-out;
     
-    .logo-container {
-      text-align: center;
-      margin-bottom: 2rem;
-      animation: fadeIn 0.5s ease-out;
+    .logo {
+      width: 120px;
+      height: auto;
+      margin-bottom: 1rem;
+      transition: transform 0.3s ease;
       
-      .logo {
-        width: 120px;
-        height: auto;
-        margin-bottom: 1rem;
-        transition: transform 0.3s ease;
-        
-        &:hover {
-          transform: scale(1.05);
-        }
-      }
-      
-      h2 {
-        color: var(--ion-color-duoc-blue);
-        font-size: 1.5rem;
-        margin: 0;
-        font-weight: bold;
-      }
-      
-      p {
-        color: var(--ion-color-duoc-yellow);
-        font-size: 1rem;
-        margin: 5px 0 0;
+      &:hover {
+        transform: scale(1.05);
       }
     }
     
-    .registro-form {
-      animation: slideUp 0.5s ease-out;
+    h2 {
+      color: var(--ion-color-duoc-blue);
+      font-size: 1.5rem;
+      margin: 0;
+      font-weight: bold;
+    }
+    
+    p {
+      color: var(--ion-color-duoc-yellow);
+      font-size: 1rem;
+      margin: 5px 0 0;
+    }
+  }
+  
+  .registro-form {
+    animation: slideUp 0.5s ease-out;
+    
+    .custom-input {
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      --background: #f8f9fa;
+      --border-color: transparent;
+      --highlight-height: 0;
+      transition: all 0.3s ease;
       
-      .custom-input {
-        margin-bottom: 1rem;
-        border-radius: 8px;
-        --background: #f8f9fa;
-        --border-color: transparent;
-        --highlight-height: 0;
-        transition: all 0.3s ease;
-        
-        &.item-has-focus {
-          --background: #ffffff;
-          --border-color: var(--ion-color-duoc-blue);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        &.item-has-error {
-          --border-color: var(--ion-color-danger);
-        }
-        
-        ion-label {
-          color: var(--ion-color-duoc-blue);
-          font-weight: 500;
-        }
-        
-        ion-input {
-          --padding-start: 16px;
-          --padding-end: 16px;
-        }
-        
-        ion-note {
-          font-size: 0.8rem;
-          padding: 4px 0;
-          
-          &[slot="error"] {
-            color: var(--ion-color-danger);
-            animation: shake 0.3s ease-in-out;
-          }
-          
-          &[slot="helper"] {
-            color: var(--ion-color-medium);
-          }
-        }
+      &.item-has-focus {
+        --background: #ffffff;
+        --border-color: var(--ion-color-duoc-blue);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
       
-      .password-toggle {
+      &.item-has-error {
+        --border-color: var(--ion-color-danger);
+      }
+    }
+    
+    .password-toggle {
+      margin: 0;
+      --padding-start: 4px;
+      --padding-end: 4px;
+    }
+    
+    .image-preview {
+      width: 150px;
+      height: 150px;
+      margin: 1rem auto;
+      border-radius: 75px;
+      overflow: hidden;
+      position: relative;
+      border: 3px solid var(--ion-color-duoc-yellow);
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      
+      .remove-image {
+        position: absolute;
+        top: 0;
+        right: 0;
         margin: 0;
         --padding-start: 4px;
         --padding-end: 4px;
-        
-        ion-icon {
-          font-size: 1.2rem;
-          color: var(--ion-color-medium);
-        }
       }
+    }
+    
+    .registro-button {
+      margin-top: 2rem;
+      height: 48px;
+      --border-radius: 24px;
+      font-weight: bold;
       
-      .upload-button {
-        margin: 0;
-        --padding-start: 8px;
-        --padding-end: 8px;
-        
-        ion-icon {
-          margin-right: 8px;
-        }
-      }
-      
-      .file-name {
-        font-size: 0.8rem;
-        color: var(--ion-color-medium);
-        margin-top: 4px;
-        padding: 4px 8px;
-        background: var(--ion-color-light);
-        border-radius: 4px;
-        word-break: break-all;
-      }
-      
-      .upload-progress {
-        margin: 8px 0;
-        padding: 8px;
-        background: var(--ion-color-light);
-        border-radius: 4px;
-        
-        ion-progress-bar {
-          --progress-background: var(--ion-color-duoc-blue);
-        }
-        
-        ion-note {
-          display: block;
-          text-align: center;
-          margin-top: 4px;
-          font-size: 0.8rem;
-        }
-      }
-      
-      .image-preview {
-        width: 150px;
-        height: 150px;
-        margin: 1rem auto;
-        border-radius: 75px;
-        overflow: hidden;
-        position: relative;
-        border: 3px solid var(--ion-color-duoc-yellow);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
-        
-        &:hover {
-          transform: scale(1.05);
-          
-          .remove-image {
-            opacity: 1;
-          }
-        }
-        
-        img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-        }
-        
-        .remove-image {
-          position: absolute;
-          top: 0;
-          right: 0;
-          margin: 0;
-          --padding-start: 4px;
-          --padding-end: 4px;
-          opacity: 0;
-          transition: opacity 0.3s ease;
-          
-          ion-icon {
-            font-size: 1.5rem;
-            color: var(--ion-color-danger);
-          }
-        }
-      }
-      
-      .registro-button {
-        margin-top: 2rem;
-        height: 48px;
-        --border-radius: 24px;
-        font-weight: bold;
-        overflow: hidden;
-        transition: transform 0.3s ease;
-        
-        &:not([disabled]):hover {
-          transform: translateY(-2px);
-        }
-        
-        ion-spinner {
-          margin-right: 8px;
-        }
+      ion-spinner {
+        margin-right: 8px;
       }
     }
   }
-  
-  // Animaciones
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+}
+
+// Animaciones
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
   }
-  
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  // Responsive
-  @media (max-width: 576px) {
-    .registro-container {
-      padding: 10px;
-      
-      .logo-container {
-        .logo {
-          width: 100px;
-        }
-      }
-      
-      .image-preview {
-        width: 120px;
-        height: 120px;
-        border-radius: 60px;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive
+@media (max-width: 576px) {
+  .registro-container {
+    padding: 10px;
+    
+    .logo-container {
+      .logo {
+        width: 100px;
       }
     }
+    
+    .image-preview {
+      width: 120px;
+      height: 120px;
+      border-radius: 60px;
+    }
   }
+}

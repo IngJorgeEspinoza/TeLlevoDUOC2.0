@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Vehiculo } from '../interfaces/vehiculo.interface';
@@ -11,7 +11,6 @@ import { StorageService } from './storage.service';
 })
 export class VehiculoService {
   private apiUrl = environment.apiUrl;
-  private mapsKey = environment.mapsKey;
   private firebaseConfig = environment.firebaseConfig;
 
   constructor(
@@ -19,7 +18,7 @@ export class VehiculoService {
     private storage: StorageService
   ) { }
 
-  agregarVehiculo(vehiculo: Vehiculo, imagen: File): Observable<any> {
+  agregarVehiculo(vehiculo: Vehiculo, imagen?: File): Observable<any> {
     const formData = new FormData();
     formData.append('p_id_usuario', vehiculo.id_usuario.toString());
     formData.append('p_patente', vehiculo.patente);
@@ -29,7 +28,10 @@ export class VehiculoService {
     formData.append('p_color', vehiculo.color);
     formData.append('p_tipo_combustible', vehiculo.tipo_combustible);
     formData.append('token', this.firebaseConfig.apiKey);
-    formData.append('image', imagen);
+    
+    if (imagen) {
+      formData.append('image', imagen);
+    }
 
     return this.http.post(`${this.apiUrl}vehiculo/agregar`, formData).pipe(
       map(response => {
@@ -47,12 +49,12 @@ export class VehiculoService {
     let params = new HttpParams()
       .set('token', this.firebaseConfig.apiKey);
     
-    if (id) params = params.set('p_id', id.toString());
+    if (id) {
+      params = params.set('p_id', id.toString());
+    }
 
     return this.http.get(`${this.apiUrl}vehiculo/obtener`, { params }).pipe(
-      map(response => {
-        return response;
-      }),
+      map(response => response),
       catchError(error => {
         console.error('Error en obtenerVehiculo:', error);
         return throwError(() => error);

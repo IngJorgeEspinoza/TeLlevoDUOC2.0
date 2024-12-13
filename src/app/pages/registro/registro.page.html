@@ -1,7 +1,7 @@
 <ion-header class="ion-no-border">
   <ion-toolbar color="duoc-blue">
     <ion-buttons slot="start">
-      <ion-back-button defaultHref="/login" color="duoc-yellow" aria-label="Volver al inicio de sesión"></ion-back-button>
+      <ion-back-button defaultHref="/login" color="duoc-yellow"></ion-back-button>
     </ion-buttons>
     <ion-title color="duoc-yellow">Registro</ion-title>
   </ion-toolbar>
@@ -10,22 +10,21 @@
 <ion-content class="ion-padding">
   <div class="registro-container">
     <!-- Logo y título -->
-    <div class="logo-container" role="banner">
+    <div class="logo-container">
       <img src="assets/imgs/logo-duoc.png" alt="DuocUC Logo" class="logo">
       <h2>Crear Cuenta</h2>
       <p>Te Llevo DUOC</p>
     </div>
 
     <!-- Formulario -->
-    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="registro-form" role="form">
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="registro-form">
       <!-- Nombre -->
       <ion-item class="custom-input">
         <ion-label position="floating">Nombre completo</ion-label>
         <ion-input 
           type="text" 
           formControlName="nombre"
-          placeholder="Juan Pérez"
-          aria-label="Ingrese su nombre completo">
+          placeholder="Juan Pérez">
         </ion-input>
         <ion-note slot="error" *ngIf="registroForm.get('nombre')?.touched && registroForm.get('nombre')?.errors?.['required']">
           El nombre es requerido
@@ -38,10 +37,9 @@
         <ion-input 
           type="email" 
           formControlName="email"
-          placeholder="usuario@duocuc.cl"
-          aria-label="Ingrese su correo electrónico institucional">
+          placeholder="usuario&#64;duocuc.cl">
         </ion-input>
-        <ion-note slot="helper">Debe ser un correo @duocuc.cl</ion-note>
+        <ion-note slot="helper">Debe ser un correo &#64;duocuc.cl</ion-note>
         <ion-note slot="error" *ngIf="registroForm.get('email')?.touched && registroForm.get('email')?.errors?.['required']">
           El correo es requerido
         </ion-note>
@@ -49,7 +47,7 @@
           Ingrese un correo válido
         </ion-note>
         <ion-note slot="error" *ngIf="registroForm.get('email')?.touched && registroForm.get('email')?.errors?.['duocEmail']">
-          Debe usar un correo @duocuc.cl
+          Debe usar un correo &#64;duocuc.cl
         </ion-note>
       </ion-item>
 
@@ -59,15 +57,13 @@
         <ion-input 
           type="tel" 
           formControlName="telefono"
-          placeholder="+569XXXXXXXX"
-          aria-label="Ingrese su número de teléfono">
+          placeholder="+569XXXXXXXX">
         </ion-input>
-        <ion-note slot="helper">Formato: +569XXXXXXXX</ion-note>
         <ion-note slot="error" *ngIf="registroForm.get('telefono')?.touched && registroForm.get('telefono')?.errors?.['required']">
           El teléfono es requerido
         </ion-note>
         <ion-note slot="error" *ngIf="registroForm.get('telefono')?.touched && registroForm.get('telefono')?.errors?.['pattern']">
-          Formato incorrecto. Debe ser +569XXXXXXXX
+          Formato: +569XXXXXXXX
         </ion-note>
       </ion-item>
 
@@ -77,20 +73,15 @@
         <ion-input 
           [type]="showPassword ? 'text' : 'password'" 
           formControlName="password"
-          placeholder="Mínimo 6 caracteres"
-          aria-label="Ingrese su contraseña">
+          placeholder="Mínimo 6 caracteres">
         </ion-input>
         <ion-button 
           fill="clear" 
           slot="end" 
           (click)="togglePassword()"
-          class="password-toggle"
-          aria-label="Mostrar u ocultar contraseña">
-          <ion-icon [name]="showPassword ? 'eye-off' : 'eye'" 
-                    [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">
-          </ion-icon>
+          class="password-toggle">
+          <ion-icon [name]="showPassword ? 'eye-off' : 'eye'" slot="icon-only"></ion-icon>
         </ion-button>
-        <ion-note slot="helper">La contraseña debe tener al menos 6 caracteres</ion-note>
         <ion-note slot="error" *ngIf="registroForm.get('password')?.touched && registroForm.get('password')?.errors?.['required']">
           La contraseña es requerida
         </ion-note>
@@ -105,8 +96,7 @@
         <ion-input 
           [type]="showPassword ? 'text' : 'password'" 
           formControlName="confirmPassword"
-          placeholder="Repita su contraseña"
-          aria-label="Confirme su contraseña">
+          placeholder="Repita su contraseña">
         </ion-input>
         <ion-note slot="error" *ngIf="registroForm.get('confirmPassword')?.touched && registroForm.get('confirmPassword')?.errors?.['required']">
           Debe confirmar la contraseña
@@ -120,55 +110,28 @@
       <ion-item class="custom-input">
         <ion-label>Foto de perfil</ion-label>
         <input
-          #fileInput
           type="file"
-          accept="image/jpeg,image/png,image/jpg"
+          accept="image/*"
           (change)="onFileSelected($event)"
           hidden
-          aria-label="Seleccionar foto de perfil"
-          [attr.aria-invalid]="registroForm.get('imagen')?.invalid && registroForm.get('imagen')?.touched">
-
+          #fileInput>
         <ion-button 
           fill="clear" 
           (click)="fileInput.click()"
-          class="upload-button"
-          aria-label="Subir foto de perfil">
-          <ion-icon name="camera-outline" aria-hidden="true"></ion-icon>
+          class="upload-button">
+          <ion-icon name="camera-outline" slot="start"></ion-icon>
           Seleccionar imagen
         </ion-button>
-
-        <ion-note slot="helper">
-          Formato: JPG, PNG. Tamaño máximo: 5MB
-        </ion-note>
-        
-        <!-- Nombre del archivo seleccionado -->
-        <div *ngIf="nombreArchivo" class="file-name">
-          Archivo seleccionado: {{nombreArchivo}}
-        </div>
-
         <ion-note slot="error" *ngIf="registroForm.get('imagen')?.touched && registroForm.get('imagen')?.errors?.['required']">
           La imagen es requerida
         </ion-note>
-        <ion-note slot="error" *ngIf="registroForm.get('imagen')?.touched && registroForm.get('imagen')?.errors?.['invalidSize']">
-          La imagen debe ser menor a 5MB
-        </ion-note>
-        <ion-note slot="error" *ngIf="registroForm.get('imagen')?.touched && registroForm.get('imagen')?.errors?.['invalidType']">
-          Formato no válido. Use JPG o PNG
-        </ion-note>
       </ion-item>
 
-      <!-- Progress bar para la carga de imagen -->
-      <div class="upload-progress" *ngIf="uploadProgress > 0 && uploadProgress < 100">
-        <ion-progress-bar [value]="uploadProgress / 100"></ion-progress-bar>
-        <ion-note>Subiendo imagen: {{uploadProgress}}%</ion-note>
-      </div>
-
       <!-- Preview de la imagen -->
-      <div class="image-preview" *ngIf="imagenPreview" role="img" [attr.aria-label]="'Preview de la imagen seleccionada'">
-        <img [src]="imagenPreview" alt="Preview de imagen de perfil">
-        <ion-button fill="clear" color="danger" (click)="removeImage()" class="remove-image"
-                    aria-label="Eliminar imagen seleccionada">
-          <ion-icon name="close-circle" aria-hidden="true"></ion-icon>
+      <div class="image-preview" *ngIf="imagenPreview">
+        <img [src]="imagenPreview" alt="Preview">
+        <ion-button fill="clear" color="danger" (click)="removeImage()" class="remove-image">
+          <ion-icon name="close-circle"></ion-icon>
         </ion-button>
       </div>
 
@@ -178,33 +141,10 @@
         color="duoc-blue" 
         type="submit"
         [disabled]="!registroForm.valid || isLoading"
-        class="registro-button"
-        (click)="confirmarRegistro($event)">
-        <ion-spinner name="crescent" *ngIf="isLoading" aria-label="Cargando"></ion-spinner>
+        class="registro-button">
+        <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
         <span *ngIf="!isLoading">Registrarse</span>
       </ion-button>
     </form>
   </div>
 </ion-content>
-
-<!-- Modal de confirmación -->
-<ion-modal [isOpen]="mostrarConfirmacion">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Confirmar registro</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <h2>¿Estás seguro de que deseas registrarte?</h2>
-      <p>Por favor, verifica que todos los datos sean correctos:</p>
-      <ul>
-        <li><strong>Nombre:</strong> {{registroForm.get('nombre')?.value}}</li>
-        <li><strong>Correo:</strong> {{registroForm.get('email')?.value}}</li>
-        <li><strong>Teléfono:</strong> {{registroForm.get('telefono')?.value}}</li>
-      </ul>
-      <ion-button expand="block" (click)="confirmarYEnviar()">Confirmar y registrar</ion-button>
-      <ion-button expand="block" fill="clear" (click)="cancelarRegistro()">Cancelar</ion-button>
-    </ion-content>
-  </ng-template>
-</ion-modal>

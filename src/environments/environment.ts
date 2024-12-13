@@ -9,12 +9,5 @@ export const environment = {
     storageBucket: "te-llevo-duoc20.firebasestorage.app",
     messagingSenderId: "472451327162",
     appId: "1:472451327162:web:7a2b54638e5ceea85d8e83"
-  },
-  firebaseAuthConfig: {
-    algorithm: 'SCRYPT',
-    base64_signer_key: 'YmcbXpLOJMJoIOYnpvkq046JOBPYylhTv2xQgsAe95wT6qPE8obofOgXQsko+wZr8AHSfkceULBnYaE6yLNwAA==',
-    base64_salt_separator: 'Bw==',
-    rounds: 8,
-    mem_cost: 14
   }
 };

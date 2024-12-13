@@ -29,7 +29,7 @@ export class RecuperarPasswordPage implements OnInit {
 
   validarCorreoDuoc(control: any) {
     const email = control.value;
-    if (email && !email.toLowerCase().endsWith('@duocuc.cl')) {
+    if (email && !email.toLowerCase().endsWith('&#64;duocuc.cl')) {
       return { duocEmail: true };
     }
     return null;

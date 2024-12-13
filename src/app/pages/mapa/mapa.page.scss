@@ -1,44 +1,62 @@
+// Variables
+:host {
+  --card-height: auto;
+  --card-width: 90%;
+}
+
+// Contenedor del mapa
 .map-container {
-    width: 100%;
-    height: 100%;
-    position: relative;
-  }
-  
-  .viaje-details {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 16px;
-    z-index: 1000;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+// Detalles del viaje
+.viaje-details {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--card-width);
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  animation: slideUp 0.3s ease-out;
+  z-index: 1000;
+
+  ion-card-header {
+    padding: 16px;
     
-    ion-card-header {
-      padding: 16px;
+    ion-card-subtitle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      margin-bottom: 8px;
       
-      ion-card-subtitle {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 1rem;
-        
-        ion-icon {
-          color: var(--ion-color-duoc-blue);
-        }
-      }
-      
-      ion-card-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-top: 8px;
+      ion-icon {
+        color: var(--ion-color-duoc-blue);
       }
     }
     
-    ion-card-content {
-      padding: 0 16px 16px;
+    ion-card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin: 0;
+    }
+  }
+
+  ion-card-content {
+    padding: 0 16px 16px;
+
+    ion-grid {
+      padding: 0;
+      
+      ion-row {
+        margin-bottom: 12px;
+      }
       
       small {
         font-size: 0.8rem;
@@ -47,49 +65,106 @@
       p {
         margin: 4px 0;
         font-weight: 500;
+        font-size: 0.95rem;
       }
+    }
+
+    .action-buttons {
+      display: grid;
+      gap: 8px;
+      margin-top: 16px;
       
-      .action-buttons {
-        margin-top: 16px;
-        display: grid;
-        gap: 8px;
+      ion-button {
+        margin: 0;
+        height: 44px;
         
-        ion-button {
-          margin: 0;
+        ion-spinner {
+          margin-right: 8px;
         }
       }
     }
   }
+}
+
+// Loading spinner
+.loading-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
   
-  .loading-spinner {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    color: var(--ion-color-duoc-blue);
+  ion-spinner {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
   }
   
-  // Animaciones
-  @keyframes slideUp {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
+  p {
+    margin: 0;
+    color: var(--ion-color-medium);
+    font-size: 0.9rem;
   }
-  
+}
+
+// Animaciones
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Responsive
+@media (min-width: 768px) {
+  :host {
+    --card-width: 600px;
+  }
+}
+
+@media (max-width: 576px) {
   .viaje-details {
-    animation: slideUp 0.3s ease-out;
+    bottom: 0;
+    border-radius: 12px 12px 0 0;
+    width: 100%;
   }
   
-  // Responsive
-  @media (max-width: 576px) {
-    .viaje-details {
-      margin: 0;
-      border-radius: 12px 12px 0 0;
+  .action-buttons {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+// Dark mode support
+:host-context(.dark-theme) {
+  .viaje-details {
+    background: rgba(28, 28, 30, 0.95);
+  }
+  
+  .loading-container {
+    background: rgba(28, 28, 30, 0.9);
+    
+    p {
+      color: var(--ion-color-light);
     }
   }
+}

@@ -1,102 +1,65 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar color="duoc-blue">
-    <ion-buttons slot="start">
-      <ion-menu-button color="duoc-yellow"></ion-menu-button>
-    </ion-buttons>
-    <ion-title color="duoc-yellow">Te Llevo DUOC</ion-title>
-  </ion-toolbar>
-</ion-header>
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { MenuController } from '@ionic/angular';
+import { AuthService } from '../../services/auth.service';
+import { StorageService } from '../../services/storage.service';
+import { Usuario } from '../../interfaces/usuario.interface';
 
-<ion-menu contentId="main-content">
-  <ion-header>
-    <ion-toolbar color="duoc-blue">
-      <ion-title color="duoc-yellow">Menú</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  <ion-content>
-    <div class="menu-header">
-      <div class="user-image">
-        <img [src]="userImage || 'assets/imgs/default-user.png'" alt="Foto de perfil">
-      </div>
-      <h2>{{userName || 'Usuario'}}</h2>
-      <p>{{userEmail || 'correo@duocuc.cl'}}</p>
-    </div>
+@Component({
+  selector: 'app-home',
+  templateUrl: './home.page.html',
+  styleUrls: ['./home.page.scss'],
+})
+export class HomePage implements OnInit {
+  usuario: Usuario | null = null;
+  isDarkMode = false;
+  fontSize = 'medium';
 
-    <ion-list>
-      <ion-item routerLink="/perfil" detail="true">
-        <ion-icon name="person-outline" slot="start"></ion-icon>
-        <ion-label>Mi Perfil</ion-label>
-      </ion-item>
-      
-      <ion-item routerLink="/vehiculos" detail="true">
-        <ion-icon name="car-outline" slot="start"></ion-icon>
-        <ion-label>Mis Vehículos</ion-label>
-      </ion-item>
+  constructor(
+    private authService: AuthService,
+    private storageService: StorageService,
+    private menuCtrl: MenuController,
+    private router: Router
+  ) { }
 
-      <ion-item button (click)="toggleTheme()">
-        <ion-icon [name]="isDarkTheme ? 'sunny-outline' : 'moon-outline'" slot="start"></ion-icon>
-        <ion-label>Tema {{isDarkTheme ? 'Claro' : 'Oscuro'}}</ion-label>
-      </ion-item>
+  async ngOnInit() {
+    await this.cargarUsuario();
+    await this.cargarPreferencias();
+  }
 
-      <ion-item button (click)="openFontSizeModal()">
-        <ion-icon name="text-outline" slot="start"></ion-icon>
-        <ion-label>Tamaño de Texto</ion-label>
-      </ion-item>
+  async cargarUsuario() {
+    this.usuario = await this.storageService.get('usuario_actual');
+    if (!this.usuario) {
+      this.router.navigate(['/login']);
+    }
+  }
 
-      <ion-item button (click)="logout()" color="danger">
-        <ion-icon name="log-out-outline" slot="start"></ion-icon>
-        <ion-label>Cerrar Sesión</ion-label>
-      </ion-item>
-    </ion-list>
-  </ion-content>
-</ion-menu>
+  async cargarPreferencias() {
+    this.isDarkMode = await this.storageService.get('dark-theme') || false;
+    this.fontSize = await this.storageService.get('font-size') || 'medium';
+    this.aplicarPreferencias();
+  }
 
-<div class="ion-page" id="main-content">
-  <ion-content>
-    <ion-tabs>
-      <ion-tab-bar slot="bottom" color="duoc-blue">
-        <ion-tab-button tab="mapa">
-          <ion-icon name="map-outline"></ion-icon>
-          <ion-label>Mapa</ion-label>
-        </ion-tab-button>
+  aplicarPreferencias() {
+    document.body.classList.toggle('dark-theme', this.isDarkMode);
+    document.body.classList.remove('font-small', 'font-medium', 'font-large');
+    document.body.classList.add(`font-${this.fontSize}`);
+  }
 
-        <ion-tab-button tab="viajes">
-          <ion-icon name="car-sport-outline"></ion-icon>
-          <ion-label>Viajes</ion-label>
-        </ion-tab-button>
-      </ion-tab-bar>
-    </ion-tabs>
-  </ion-content>
-</div>
+  async toggleDarkMode() {
+    this.isDarkMode = !this.isDarkMode;
+    await this.storageService.set('dark-theme', this.isDarkMode);
+    this.aplicarPreferencias();
+  }
 
-<!-- Modal para tamaño de texto -->
-<ion-modal [isOpen]="fontSizeModalOpen" (didDismiss)="fontSizeModalOpen = false">
-  <ng-template>
-    <ion-header>
-      <ion-toolbar>
-        <ion-title>Tamaño de Texto</ion-title>
-        <ion-buttons slot="end">
-          <ion-button (click)="fontSizeModalOpen = false">Cerrar</ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content class="ion-padding">
-      <ion-list>
-        <ion-radio-group [(ngModel)]="selectedFontSize" (ionChange)="changeFontSize($event)">
-          <ion-item>
-            <ion-label>Pequeño</ion-label>
-            <ion-radio value="small"></ion-radio>
-          </ion-item>
-          <ion-item>
-            <ion-label>Normal</ion-label>
-            <ion-radio value="medium"></ion-radio>
-          </ion-item>
-          <ion-item>
-            <ion-label>Grande</ion-label>
-            <ion-radio value="large"></ion-radio>
-          </ion-item>
-        </ion-radio-group>
-      </ion-list>
-    </ion-content>
-  </ng-template>
-</ion-modal>
+  async cambiarTamanioFuente(size: 'small' | 'medium' | 'large') {
+    this.fontSize = size;
+    await this.storageService.set('font-size', size);
+    this.aplicarPreferencias();
+  }
+
+  async cerrarSesion() {
+    await this.authService.logout();
+    this.router.navigate(['/login'], { replaceUrl: true });
+  }
+}

@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { LoadingController, ToastController, AlertController, ModalController } from '@ionic/angular';
+import { LoadingController, ToastController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { UsuarioService } from '../../services/usuario.service';
 
@@ -12,19 +12,12 @@ import { UsuarioService } from '../../services/usuario.service';
 })
 export class RegistroPage implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
-  
+
   registroForm: FormGroup;
   showPassword: boolean = false;
   isLoading: boolean = false;
   imagenPreview: string | null = null;
   imagenFile: File | null = null;
-  nombreArchivo: string = '';
-  uploadProgress: number = 0;
-  mostrarConfirmacion: boolean = false;
-  
-  // Constantes para validación de imagen
-  readonly MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-  readonly ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
 
   constructor(
     private formBuilder: FormBuilder,
@@ -32,9 +25,7 @@ export class RegistroPage implements OnInit {
     private usuarioService: UsuarioService,
     private router: Router,
     private loadingController: LoadingController,
-    private toastController: ToastController,
-    private alertController: AlertController,
-    private modalController: ModalController
+    private toastController: ToastController
   ) {
     this.registroForm = this.formBuilder.group({
       nombre: ['', [Validators.required, Validators.minLength(3)]],
@@ -52,18 +43,11 @@ export class RegistroPage implements OnInit {
     });
   }
 
-  ngOnInit() {
-    // Verificar si ya hay sesión activa
-    this.authService.authState$.subscribe(user => {
-      if (user) {
-        this.router.navigate(['/home']);
-      }
-    });
-  }
+  ngOnInit() {}
 
   validarCorreoDuoc(control: any) {
     const email = control.value;
-    if (email && !email.toLowerCase().endsWith('@duocuc.cl')) {
+    if (email && !email.toLowerCase().endsWith('&#64;duocuc.cl')) {
       return { duocEmail: true };
     }
     return null;
@@ -88,28 +72,19 @@ export class RegistroPage implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Validar tipo de archivo
-    if (!this.ALLOWED_TYPES.includes(file.type)) {
-      await this.showToast('Formato de archivo no válido. Use JPG o PNG', 'warning');
-      this.registroForm.get('imagen')?.setErrors({ invalidType: true });
+    if (!file.type.startsWith('image/')) {
+      await this.showToast('Por favor, selecciona una imagen válida', 'warning');
       return;
     }
 
-    // Validar tamaño
-    if (file.size > this.MAX_IMAGE_SIZE) {
+    if (file.size > 5 * 1024 * 1024) {
       await this.showToast('La imagen debe ser menor a 5MB', 'warning');
-      this.registroForm.get('imagen')?.setErrors({ invalidSize: true });
       return;
     }
 
     this.imagenFile = file;
-    this.nombreArchivo = file.name;
     this.registroForm.patchValue({ imagen: file });
     
-    // Simular progreso de carga
-    this.simularProgresoCarga();
-    
-    // Crear preview
     const reader = new FileReader();
     reader.onload = (e) => {
       this.imagenPreview = e.target?.result as string;
@@ -117,42 +92,11 @@ export class RegistroPage implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  private simularProgresoCarga() {
-    this.uploadProgress = 0;
-    const interval = setInterval(() => {
-      this.uploadProgress += 10;
-      if (this.uploadProgress >= 100) {
-        clearInterval(interval);
-      }
-    }, 100);
-  }
-
   removeImage() {
     this.imagenPreview = null;
     this.imagenFile = null;
-    this.nombreArchivo = '';
-    this.uploadProgress = 0;
     this.fileInput.nativeElement.value = '';
     this.registroForm.patchValue({ imagen: null });
-  }
-
-  async confirmarRegistro(event: Event) {
-    event.preventDefault();
-    if (this.registroForm.valid) {
-      this.mostrarConfirmacion = true;
-    } else {
-      this.registroForm.markAllAsTouched();
-      await this.showToast('Por favor, complete todos los campos correctamente', 'warning');
-    }
-  }
-
-  async confirmarYEnviar() {
-    this.mostrarConfirmacion = false;
-    await this.onSubmit();
-  }
-
-  cancelarRegistro() {
-    this.mostrarConfirmacion = false;
   }
 
   async onSubmit() {
@@ -179,8 +123,6 @@ export class RegistroPage implements OnInit {
         
         if (error.code === 'auth/email-already-in-use') {
           message = 'El correo ya está registrado';
-        } else if (error.code === 'auth/weak-password') {
-          message = 'La contraseña es muy débil';
         }
         
         await this.showToast(message, 'danger');
@@ -207,8 +149,7 @@ export class RegistroPage implements OnInit {
     await toast.present();
   }
 
-  async ngOnDestroy() {
-    // Limpiar recursos
+  ngOnDestroy() {
     if (this.imagenPreview) {
       URL.revokeObjectURL(this.imagenPreview);
     }

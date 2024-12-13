@@ -1,4 +1,4 @@
-<ion-header class="ion-no-border"></ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar color="duoc-blue">
     <ion-buttons slot="start">
       <ion-back-button defaultHref="/home" color="duoc-yellow"></ion-back-button>
@@ -77,7 +77,8 @@
         type="submit"
         class="guardar-button"
         *ngIf="modoEdicion"
-        [disabled]="!perfilForm.valid || guardando">
+        [disabled]="!perfilForm.valid || guardando"
+        color="duoc-blue">
         <ion-spinner name="crescent" *ngIf="guardando"></ion-spinner>
         <span *ngIf="!guardando">Guardar Cambios</span>
       </ion-button>

@@ -13,6 +13,7 @@ import { Router } from '@angular/router';
 export class VehiculosPage implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
 
+  // Variables de formulario y estado
   vehiculos: any[] = [];
   vehiculoForm: FormGroup;
   modalAbierto: boolean = false;
@@ -23,6 +24,10 @@ export class VehiculosPage implements OnInit {
   cargando: boolean = false;
   guardando: boolean = false;
   usuarioActual: any;
+
+  // Variables para validación de años
+  readonly anoMinimo = 2000;
+  readonly anoMaximo = new Date().getFullYear();
 
   constructor(
     private formBuilder: FormBuilder,
@@ -35,10 +40,14 @@ export class VehiculosPage implements OnInit {
   ) {
     this.vehiculoForm = this.formBuilder.group({
       patente: ['', [Validators.required, Validators.pattern(/^[A-Z]{4}\d{2}$/)]],
-      marca: ['', Validators.required],
-      modelo: ['', Validators.required],
-      anio: ['', [Validators.required, Validators.min(2000), Validators.max(new Date().getFullYear())]],
-      color: ['', Validators.required],
+      marca: ['', [Validators.required, Validators.minLength(2)]],
+      modelo: ['', [Validators.required, Validators.minLength(2)]],
+      anio: ['', [
+        Validators.required, 
+        Validators.min(this.anoMinimo), 
+        Validators.max(this.anoMaximo)
+      ]],
+      color: ['', [Validators.required, Validators.minLength(3)]],
       tipo_combustible: ['', Validators.required]
     });
   }
@@ -87,14 +96,24 @@ export class VehiculosPage implements OnInit {
     this.vehiculoSeleccionado = null;
     this.imagenPreview = null;
     this.imagenFile = null;
-    this.vehiculoForm.reset();
+    this.vehiculoForm.reset({
+      tipo_combustible: ''
+    });
     this.modalAbierto = true;
   }
 
   editarVehiculo(vehiculo: any) {
     this.modoEdicion = true;
     this.vehiculoSeleccionado = vehiculo;
-    this.vehiculoForm.patchValue(vehiculo);
+    this.vehiculoForm.patchValue({
+      patente: vehiculo.patente,
+      marca: vehiculo.marca,
+      modelo: vehiculo.modelo,
+      anio: vehiculo.anio,
+      color: vehiculo.color,
+      tipo_combustible: vehiculo.tipo_combustible
+    });
+    this.imagenPreview = vehiculo.imagen;
     this.modalAbierto = true;
   }
 
@@ -116,12 +135,12 @@ export class VehiculosPage implements OnInit {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      this.mostrarToast('Por favor, selecciona una imagen', 'warning');
+      await this.mostrarToast('Por favor, selecciona una imagen válida', 'warning');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      this.mostrarToast('La imagen debe ser menor a 5MB', 'warning');
+      await this.mostrarToast('La imagen debe ser menor a 5MB', 'warning');
       return;
     }
 
@@ -140,16 +159,13 @@ export class VehiculosPage implements OnInit {
       try {
         const vehiculo = {
           ...this.vehiculoForm.value,
-          id_usuario: this.usuarioActual.id
+          id_usuario: this.usuarioActual.id,
+          id: this.vehiculoSeleccionado?.id
         };
 
-        if (this.modoEdicion && this.vehiculoSeleccionado) {
-          vehiculo.id = this.vehiculoSeleccionado.id;
-        }
-
-        await this.vehiculoService.agregarVehiculo(vehiculo, this.imagenFile || undefined).toPromise();
+        await this.vehiculoService.agregarVehiculo(vehiculo, this.imagenFile ?? undefined).toPromise();
         
-        this.mostrarToast(
+        await this.mostrarToast(
           `Vehículo ${this.modoEdicion ? 'actualizado' : 'agregado'} correctamente`,
           'success'
         );
@@ -157,7 +173,7 @@ export class VehiculosPage implements OnInit {
         this.cargarVehiculos();
       } catch (error) {
         console.error('Error al guardar vehículo:', error);
-        this.mostrarToast(
+        await this.mostrarToast(
           `Error al ${this.modoEdicion ? 'actualizar' : 'agregar'} el vehículo`,
           'danger'
         );
@@ -166,6 +182,7 @@ export class VehiculosPage implements OnInit {
       }
     } else {
       this.vehiculoForm.markAllAsTouched();
+      await this.mostrarToast('Por favor, complete todos los campos correctamente', 'warning');
     }
   }
 
@@ -182,13 +199,12 @@ export class VehiculosPage implements OnInit {
           text: 'Eliminar',
           handler: async () => {
             try {
-              // TODO: Implementar eliminación en el servicio
               await this.vehiculoService.eliminarVehiculoLocal(vehiculo.id);
-              this.mostrarToast('Vehículo eliminado correctamente', 'success');
+              await this.mostrarToast('Vehículo eliminado correctamente', 'success');
               this.cargarVehiculos();
             } catch (error) {
               console.error('Error al eliminar vehículo:', error);
-              this.mostrarToast('Error al eliminar el vehículo', 'danger');
+              await this.mostrarToast('Error al eliminar el vehículo', 'danger');
             }
           }
         }

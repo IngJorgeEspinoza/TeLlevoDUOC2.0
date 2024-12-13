@@ -6,4 +6,5 @@ export interface Viaje {
   costo: number;
   id_vehiculo: number;
   estado?: number; // 1: Activo, 2: En progreso, 3: Finalizado
+  fecha_creacion?: Date;
 }

@@ -2,11 +2,8 @@
   <ion-toolbar color="duoc-blue">
     <ion-title color="duoc-yellow">Viajes Disponibles</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="actualizarViajes()">
-        <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
-      </ion-button>
-      <ion-button routerLink="/help" color="duoc-yellow">
-        <ion-icon slot="icon-only" name="help-circle-outline"></ion-icon>
+      <ion-button (click)="actualizarViajes()" [disabled]="cargando">
+        <ion-icon name="refresh-outline" slot="icon-only" color="duoc-yellow"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
@@ -32,20 +29,20 @@
       <map-marker
         *ngFor="let viaje of viajes"
         [position]="getPosition(viaje.ubicacion_destino)"
-        [title]="'Destino'"
+        [title]="'Destino: ' + viaje.ubicacion_destino"
         (mapClick)="mostrarDetallesViaje(viaje)">
       </map-marker>
 
       <!-- Ruta seleccionada -->
       <map-polyline
-        *ngIf="rutaSeleccionada"
+        *ngIf="rutaSeleccionada.length > 0"
         [path]="rutaSeleccionada"
         [options]="polylineOptions">
       </map-polyline>
     </google-map>
   </div>
 
-  <!-- Card con detalles del viaje seleccionado -->
+  <!-- Card detalles viaje seleccionado -->
   <ion-card *ngIf="viajeSeleccionado" class="viaje-details">
     <ion-card-header>
       <ion-card-subtitle>
@@ -92,11 +89,20 @@
       </ion-grid>
 
       <div class="action-buttons">
-        <ion-button expand="block" color="duoc-blue" (click)="tomarViaje()" [disabled]="cargandoViaje">
+        <ion-button 
+          expand="block" 
+          color="duoc-blue" 
+          (click)="tomarViaje()" 
+          [disabled]="cargandoViaje">
           <ion-icon name="car-outline" slot="start"></ion-icon>
-          Tomar Viaje
+          <ion-spinner *ngIf="cargandoViaje" name="crescent"></ion-spinner>
+          <span *ngIf="!cargandoViaje">Tomar Viaje</span>
         </ion-button>
-        <ion-button expand="block" fill="outline" color="duoc-blue" (click)="chatearConductor()">
+        <ion-button 
+          expand="block" 
+          fill="outline" 
+          color="duoc-blue" 
+          (click)="chatearConductor()">
           <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
           Chatear
         </ion-button>
@@ -105,9 +111,8 @@
   </ion-card>
 
   <!-- Loading spinner -->
-  <ion-spinner 
-    *ngIf="cargando" 
-    name="crescent" 
-    class="loading-spinner">
-  </ion-spinner>
+  <div class="loading-container" *ngIf="cargando">
+    <ion-spinner name="crescent" color="duoc-blue"></ion-spinner>
+    <p>Cargando viajes...</p>
+  </div>
 </ion-content>

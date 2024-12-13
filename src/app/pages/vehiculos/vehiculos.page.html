@@ -8,9 +8,6 @@
       <ion-button (click)="nuevoVehiculo()">
         <ion-icon name="add-outline" slot="icon-only"></ion-icon>
       </ion-button>
-      <ion-button routerLink="/help" color="duoc-yellow">
-        <ion-icon slot="icon-only" name="help-circle-outline"></ion-icon>
-      </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
@@ -80,7 +77,7 @@
             <img [src]="imagenPreview || vehiculoSeleccionado?.imagen || 'assets/imgs/default-car.png'" alt="Vehículo">
             <div class="overlay">
               <ion-icon name="camera-outline"></ion-icon>
-              <p>Cambiar imagen</p>
+              <p>{{imagenPreview ? 'Cambiar imagen' : 'Seleccionar imagen'}}</p>
             </div>
           </div>
           <input
@@ -98,7 +95,6 @@
             <ion-input 
               formControlName="patente" 
               placeholder="Ej: ABCD12"
-              maxlength="6"
               [clearInput]="true">
             </ion-input>
             <ion-note slot="error" *ngIf="vehiculoForm.get('patente')?.touched && vehiculoForm.get('patente')?.errors?.['required']">
@@ -138,16 +134,15 @@
             <ion-input 
               type="number" 
               formControlName="anio"
-              placeholder="Ej: 2020"
-              [min]="2000"
-              [max]="new Date().getFullYear()"
+              [min]="anoMinimo"
+              [max]="anoMaximo"
               [clearInput]="true">
             </ion-input>
             <ion-note slot="error" *ngIf="vehiculoForm.get('anio')?.touched && vehiculoForm.get('anio')?.errors?.['required']">
               El año es requerido
             </ion-note>
             <ion-note slot="error" *ngIf="vehiculoForm.get('anio')?.touched && (vehiculoForm.get('anio')?.errors?.['min'] || vehiculoForm.get('anio')?.errors?.['max'])">
-              El año debe estar entre 2000 y {{new Date().getFullYear()}}
+              El año debe estar entre {{anoMinimo}} y {{anoMaximo}}
             </ion-note>
           </ion-item>
 
@@ -170,6 +165,7 @@
               <ion-select-option value="Diesel">Diesel</ion-select-option>
               <ion-select-option value="Gas">Gas</ion-select-option>
               <ion-select-option value="Eléctrico">Eléctrico</ion-select-option>
+              <ion-select-option value="Híbrido">Híbrido</ion-select-option>
             </ion-select>
             <ion-note slot="error" *ngIf="vehiculoForm.get('tipo_combustible')?.touched && vehiculoForm.get('tipo_combustible')?.errors?.['required']">
               El tipo de combustible es requerido

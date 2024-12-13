@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Viaje } from '../interfaces/viaje.interface';
@@ -11,7 +11,6 @@ import { StorageService } from './storage.service';
 })
 export class ViajeService {
   private apiUrl = environment.apiUrl;
-  private mapsKey = environment.mapsKey;
   private firebaseConfig = environment.firebaseConfig;
 
   constructor(
@@ -49,9 +48,7 @@ export class ViajeService {
     if (id_usuario) params = params.set('p_id_usuario', id_usuario.toString());
 
     return this.http.get(`${this.apiUrl}viaje/obtener`, { params }).pipe(
-      map(response => {
-        return response;
-      }),
+      map(response => response),
       catchError(error => {
         console.error('Error en obtenerViaje:', error);
         return throwError(() => error);
