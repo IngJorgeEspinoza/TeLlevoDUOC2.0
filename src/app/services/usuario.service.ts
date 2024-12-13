@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Usuario } from '../interfaces/usuario.interface';
@@ -21,7 +21,6 @@ export class UsuarioService {
   agregarUsuario(usuario: Usuario, imagen: File): Observable<any> {
     const formData = new FormData();
     
-    // Agregar los campos requeridos exactamente como los espera la API
     formData.append('p_nombre', usuario.nombre);
     formData.append('p_correo_electronico', usuario.correo);
     formData.append('p_telefono', usuario.telefono);
@@ -29,7 +28,6 @@ export class UsuarioService {
     formData.append('image_usuario', imagen);
 
     const headers = new HttpHeaders();
-    // No establecer Content-Type, dejando que el navegador lo configure con el boundary correcto para FormData
 
     return this.http.post(`${this.apiUrl}user/agregar`, formData, { headers }).pipe(
       map(response => {
@@ -41,7 +39,11 @@ export class UsuarioService {
         console.error('Error detallado:', error);
         console.error('Request enviado:', {
           url: `${this.apiUrl}user/agregar`,
-          formData: Array.from(formData.entries())
+          datos: {
+            nombre: usuario.nombre,
+            correo: usuario.correo,
+            telefono: usuario.telefono
+          }
         });
         return throwError(() => error);
       })
@@ -49,14 +51,10 @@ export class UsuarioService {
   }
 
   obtenerUsuario(correo?: string, id?: number): Observable<any> {
-    let params = new HttpParams()
-      .set('token', this.firebaseConfig.apiKey);
-    
-    if (id) {
-      params = params.set('p_id', id.toString());
-    } else if (correo) {
-      params = params.set('p_correo', correo);
-    }
+    const params = new HttpParams()
+      .set('token', this.token)
+      .set('p_correo', correo || '')
+      .set('p_id', id?.toString() || '');
 
     return this.http.get(`${this.apiUrl}user/obtener`, { params }).pipe(
       map(response => response),

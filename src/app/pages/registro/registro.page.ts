@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
 import { UsuarioService } from '../../services/usuario.service';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-registro',
