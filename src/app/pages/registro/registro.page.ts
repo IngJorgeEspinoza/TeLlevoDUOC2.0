@@ -133,55 +133,38 @@ export class RegistroPage implements OnInit {
     try {
       const { email, password, nombre, telefono } = this.registroForm.value;
   
-      // Primero registrar en Firebase
-      const userCredential = await this.authService.registro(email, password);
-      
-      if (!userCredential) {
-        throw new Error('Error al registrar en Firebase');
-      }
-  
-      // Si el registro en Firebase es exitoso, registrar en la API Uber
+      // Primero registrar en la API
       const usuarioData = {
         nombre,
         correo: email,
         telefono
       };
   
-      // Convertir la promesa del observable a una promesa
-      await new Promise((resolve, reject) => {
-        this.usuarioService.agregarUsuario(usuarioData, this.imagenFile)
-          .subscribe({
-            next: (response) => {
-              resolve(response);
-            },
-            error: (error) => {
-              // Si falla el registro en la API, eliminamos el usuario de Firebase
-              this.authService.logout();
-              reject(new Error('Error al registrar en la API'));
-            }
-          });
-      });
+      if (!this.imagenFile) {
+        throw new Error('La imagen es requerida');
+      }
+  
+      // Registrar en la API Uber
+      await lastValueFrom(this.usuarioService.agregarUsuario(usuarioData, this.imagenFile));
+  
+      // Si el registro en la API es exitoso, registrar en Firebase
+      await this.authService.registro(email, password);
   
       await loading.dismiss();
       await this.showToast('Registro exitoso', 'success');
       this.router.navigate(['/login']);
+  
     } catch (error: any) {
+      console.error('Error completo:', error);
       await loading.dismiss();
-      let message = 'Error en el registro';
       
-      if (error.code === 'auth/email-already-in-use') {
-        message = 'El correo ya está registrado en Firebase';
-      } else if (error.message === 'Error al registrar en la API') {
-        message = 'Error al registrar en el sistema de viajes';
-      } else if (error.code === 'auth/invalid-email') {
-        message = 'El correo electrónico no es válido';
-      } else if (error.code === 'auth/operation-not-allowed') {
-        message = 'Operación no permitida';
-      } else if (error.code === 'auth/weak-password') {
-        message = 'La contraseña es muy débil';
+      let message = 'Error en el registro';
+      if (error.status === 400) {
+        message = 'Error en los datos enviados. Verifique todos los campos.';
+      } else if (error.code === 'auth/email-already-in-use') {
+        message = 'El correo ya está registrado';
       }
       
-      console.error('Error completo:', error);
       await this.showToast(message, 'danger');
     } finally {
       this.isLoading = false;
