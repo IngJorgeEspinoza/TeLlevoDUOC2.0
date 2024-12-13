@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, throwError, from } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Usuario } from '../interfaces/usuario.interface';
 import { environment } from '../../environments/environment';
 import { StorageService } from './storage.service';
@@ -11,31 +11,38 @@ import { StorageService } from './storage.service';
 })
 export class UsuarioService {
   private apiUrl = environment.apiUrl;
-  private firebaseConfig = environment.firebaseConfig;
+  private token = environment.firebaseConfig.apiKey;
 
   constructor(
     private http: HttpClient,
     private storage: StorageService
   ) { }
 
-  agregarUsuario(usuario: Usuario, imagen?: File): Observable<any> {
+  agregarUsuario(usuario: Usuario, imagen: File): Observable<any> {
     const formData = new FormData();
+    
+    // Agregar los campos requeridos exactamente como los espera la API
     formData.append('p_nombre', usuario.nombre);
     formData.append('p_correo_electronico', usuario.correo);
     formData.append('p_telefono', usuario.telefono);
-    formData.append('token', this.firebaseConfig.apiKey);
-    
-    if (imagen) {
-      formData.append('image_usuario', imagen);
-    }
+    formData.append('token', this.token);
+    formData.append('image_usuario', imagen);
 
-    return this.http.post(`${this.apiUrl}user/agregar`, formData).pipe(
+    const headers = new HttpHeaders();
+    // No establecer Content-Type, dejando que el navegador lo configure con el boundary correcto para FormData
+
+    return this.http.post(`${this.apiUrl}user/agregar`, formData, { headers }).pipe(
       map(response => {
+        console.log('Respuesta exitosa de la API:', response);
         this.guardarUsuarioLocal(usuario);
         return response;
       }),
       catchError(error => {
-        console.error('Error en agregarUsuario:', error);
+        console.error('Error detallado:', error);
+        console.error('Request enviado:', {
+          url: `${this.apiUrl}user/agregar`,
+          formData: Array.from(formData.entries())
+        });
         return throwError(() => error);
       })
     );
