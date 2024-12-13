@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LoadingController, ToastController } from '@ionic/angular';
 import { AuthService } from '../../services/auth.service';
@@ -41,15 +41,30 @@ export class RegistroPage implements OnInit {
     }, {
       validators: this.passwordMatchValidator
     });
+
+    // Suscribirse a cambios en el email para validación en tiempo real
+    this.registroForm.get('email')?.valueChanges.subscribe(() => {
+      this.registroForm.get('email')?.updateValueAndValidity();
+    });
   }
 
   ngOnInit() {}
 
-  validarCorreoDuoc(control: any) {
+  validarCorreoDuoc(control: AbstractControl): {[key: string]: any} | null {
     const email = control.value;
-    if (email && !email.toLowerCase().endsWith('&#64;duocuc.cl')) {
+    if (!email) return null;
+    
+    const emailLower = email.toLowerCase();
+    if (!emailLower.endsWith('@duocuc.cl')) {
       return { duocEmail: true };
     }
+    
+    // Validación adicional del formato
+    const emailRegex = /^[a-zA-Z0-9._-]+@duocuc\.cl$/;
+    if (!emailRegex.test(emailLower)) {
+      return { duocEmail: true };
+    }
+    
     return null;
   }
 
@@ -57,9 +72,11 @@ export class RegistroPage implements OnInit {
     const password = group.get('password')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
     
-    if (password && confirmPassword && password !== confirmPassword) {
-      group.get('confirmPassword')?.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
+    if (password && confirmPassword) {
+      if (password !== confirmPassword) {
+        group.get('confirmPassword')?.setErrors({ passwordMismatch: true });
+        return { passwordMismatch: true };
+      }
     }
     return null;
   }
@@ -72,8 +89,9 @@ export class RegistroPage implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      await this.showToast('Por favor, selecciona una imagen válida', 'warning');
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!validImageTypes.includes(file.type)) {
+      await this.showToast('Por favor, selecciona una imagen válida (JPEG, PNG)', 'warning');
       return;
     }
 
@@ -100,38 +118,50 @@ export class RegistroPage implements OnInit {
   }
 
   async onSubmit() {
-    if (this.registroForm.valid && this.imagenFile) {
-      this.isLoading = true;
-      
-      try {
-        const { email, password, nombre, telefono } = this.registroForm.value;
-        
-        // Registro en Firebase
-        const userCredential = await this.authService.registro(email, password);
-        
-        // Registro en la API
-        await this.usuarioService.agregarUsuario({
-          nombre,
-          correo: email,
-          telefono
-        }, this.imagenFile).toPromise();
-        
-        await this.showToast('Registro exitoso', 'success');
-        this.router.navigate(['/login']);
-      } catch (error: any) {
-        let message = 'Error en el registro';
-        
-        if (error.code === 'auth/email-already-in-use') {
-          message = 'El correo ya está registrado';
-        }
-        
-        await this.showToast(message, 'danger');
-      } finally {
-        this.isLoading = false;
-      }
-    } else {
+    if (!this.registroForm.valid || !this.imagenFile) {
       this.registroForm.markAllAsTouched();
       await this.showToast('Por favor, complete todos los campos correctamente', 'warning');
+      return;
+    }
+  
+    this.isLoading = true;
+    const loading = await this.loadingController.create({
+      message: 'Registrando usuario...'
+    });
+    await loading.present();
+  
+    try {
+      const { email, password, nombre, telefono } = this.registroForm.value;
+      
+      // Primero registrar en la API Uber
+      const usuarioResponse = await this.usuarioService.agregarUsuario({
+        nombre,
+        correo: email,
+        telefono
+      }, this.imagenFile).toPromise();
+  
+      if (!usuarioResponse) {
+        throw new Error('Error al registrar en API Uber');
+      }
+  
+      // Si el registro en API es exitoso, registrar en Firebase
+      await this.authService.registro(email, password);
+      
+      await loading.dismiss();
+      await this.showToast('Registro exitoso', 'success');
+      this.router.navigate(['/login']);
+    } catch (error: any) {
+      await loading.dismiss();
+      let message = 'Error en el registro';
+      
+      if (error.code === 'auth/email-already-in-use') {
+        message = 'El correo ya está registrado';
+      } else if (error.message === 'Error al registrar en API Uber') {
+        message = 'Error al registrar en el sistema';
+      }
+      
+      await this.showToast(message, 'danger');
+      this.isLoading = false;
     }
   }
 

@@ -21,7 +21,7 @@ export class AuthService {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
       await this.storage.set('user', userCredential.user);
-      this.router.navigate(['/home']);
+      this.router.navigate(['/mapa']); 
     } catch (error) {
       throw error;
     }
