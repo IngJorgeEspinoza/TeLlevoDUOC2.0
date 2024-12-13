@@ -1,35 +1,30 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { initializeApp } from '@angular/fire/app';
-import { getAuth } from '@angular/fire/auth';
-import { getFirestore } from '@angular/fire/firestore';
-import { getStorage } from '@angular/fire/storage';
-import { environment } from '../../environments/environment';
 import { IonicModule } from '@ionic/angular';
-import { FirebaseAppModule, provideFirebaseApp } from '@angular/fire/app';
-import { AuthModule, provideAuth } from '@angular/fire/auth';
-import { FirestoreModule, provideFirestore } from '@angular/fire/firestore';
-import { StorageModule, provideStorage } from '@angular/fire/storage';
+import { getApp, initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import { getAuth, provideAuth, connectAuthEmulator } from '@angular/fire/auth';
+import { getFirestore, provideFirestore, connectFirestoreEmulator } from '@angular/fire/firestore';
+import { getStorage, provideStorage, connectStorageEmulator } from '@angular/fire/storage';
+import { environment } from '../../environments/environment';
 
 @NgModule({
-  declarations: [],
   imports: [
     CommonModule,
     IonicModule,
-    FirebaseAppModule,
-    AuthModule,
-    FirestoreModule,
-    StorageModule,
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)),
-    provideAuth(() => getAuth()),
-    provideFirestore(() => getFirestore()),
-    provideStorage(() => getStorage())
+    provideAuth(() => {
+      const auth = getAuth();
+      return auth;
+    }),
+    provideFirestore(() => {
+      const firestore = getFirestore();
+      return firestore;
+    }),
+    provideStorage(() => {
+      const storage = getStorage();
+      return storage;
+    })
   ],
-  exports: [
-    FirebaseAppModule,
-    AuthModule,
-    FirestoreModule,
-    StorageModule
-  ]
+  exports: []
 })
 export class FirebaseModule { }
